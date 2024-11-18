@@ -1,0 +1,70 @@
+/* Chatbox container with solid blue color */
+.chatbox-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    align-items: center;
+    padding: 20px;
+    background-color: #6965F1; 
+    color: white; /* Text color for better contrast */
+    width: 100%;
+    max-width: none; /* Matches the max-width of MyChats */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15); /* Slight shadow for depth */
+    position: relative;
+    overflow: hidden; /* Ensures any overflowing content is clipped */
+}
+
+/* Buttons and inputs inside the chatbox */
+.chatbox-container button,
+.chatbox-container input {
+    background-color: white; /* White background for contrast */
+    border: 1px solid #ccc; /* Subtle border for definition */
+    border-radius: 4px;
+    color: black; /* Black text for better readability */
+    padding: 10px 15px;
+    margin: 5px 0;
+    cursor: pointer;
+    font-family: 'Work Sans', sans-serif;
+}
+
+/* Optional: Add hover effects for buttons */
+.chatbox-container button:hover {
+    background-color: #2B4274; /* Darker blue shade for hover */
+    color: white; /* Text changes to white for contrast */
+}
+
+
+/* Style for chatbox text content */
+.chatbox-container .chat-content {
+    width: 100%;
+    max-height: 600px; /* Limit height for large chats */
+    overflow-y: auto; /* Add scrolling for long content */
+    background-color: #f4f4f4; /* Light gray for content background */
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+    color: black; /* Adjust text color for readability */
+}
+
+/* Chat messages inside the container */
+.chatbox-container .chat-message {
+    padding: 10px;
+    border-radius: 6px;
+    margin: 5px 0;
+    max-width: 75%; /* Limit message width */
+    word-wrap: break-word; /* Ensure long messages wrap properly */
+}
+
+/* Sender message */
+.chatbox-container .chat-message.sender {
+    background-color: #AAE7FF; /* Light blue for sent messages */
+    color: black;
+    align-self: flex-end; /* Align sender's messages to the right */
+}
+
+/* Receiver message */
+.chatbox-container .chat-message.receiver {
+    background-color: white; /* White for received messages */
+    color: black;
+    align-self: flex-start; /* Align receiver's messages to the left */
+}

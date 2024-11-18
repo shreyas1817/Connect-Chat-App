@@ -1,0 +1,80 @@
+/* MyChats.css */
+
+/* Container for MyChats */
+.my-chats-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent white background */
+  backdrop-filter: blur(10px); /* Apply blur effect */
+  width: 100%;
+  max-width: 360px;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+}
+
+/* Header for My Chats */
+.my-chats-header {
+  padding-bottom: 10px;
+  font-size: 1.5rem; /* Adjust for better readability */
+  font-family: 'Work Sans', sans-serif;
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* New Group Chat button */
+.new-group-btn {
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: #5966b7;
+  border: none;
+  cursor: pointer;
+}
+
+.new-group-btn:hover {
+  background-color: #4753a5;
+  transform: scale(1.05);
+}
+
+/* Chat list container */
+.my-chats-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 500px; /* Prevent the list from overflowing */
+  overflow-y: auto;
+  gap: 8px; /* Add spacing between items */
+}
+
+/* Individual chat item */
+.chat-item {
+  cursor: pointer;
+  padding: 10px 15px;
+  border-radius: 6px;
+  background-color: #e8e8e8;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.chat-item:hover {
+  background-color: #d6d6d6;
+}
+
+.chat-item.selected {
+  background-color: #5966b7;
+  color: white;
+}
+
+/* Latest message preview */
+.latest-message {
+  font-size: 0.85rem;
+  margin-top: 5px;
+  color: #555; /* Slightly muted text color */
+}
+
+.latest-message b {
+  color: #333;
+}
