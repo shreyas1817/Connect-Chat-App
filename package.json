@@ -1,8 +1,8 @@
 {
-  "name": "chat-app",
+  "name": "mern-chat-app",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
     "server": "nodemon backend/server.js",
@@ -12,7 +12,7 @@
     "mern",
     "chat-app"
   ],
-  "author": "Piyush Agarwal",
+  "author": "TriO",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",

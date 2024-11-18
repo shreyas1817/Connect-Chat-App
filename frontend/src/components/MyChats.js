@@ -2,7 +2,7 @@ import { AddIcon } from "@chakra-ui/icons";
 import { Box, Stack, Text } from "@chakra-ui/layout";
 import { useToast } from "@chakra-ui/toast";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react"; // Import useCallback
 import { getSender } from "../config/ChatLogics";
 import ChatLoading from "./ChatLoading";
 import GroupChatModal from "./miscellaneous/GroupChatModal";
@@ -11,13 +11,13 @@ import { ChatState } from "../Context/ChatProvider";
 import "./MyChats.css"; // Import the CSS file
 
 const MyChats = ({ fetchAgain }) => {
-  const [loggedUser, setLoggedUser] = useState();
+  const [loggedUser , setLoggedUser ] = useState();
 
   const { selectedChat, setSelectedChat, user, chats, setChats } = ChatState();
 
   const toast = useToast();
 
-  const fetchChats = async () => {
+  const fetchChats = useCallback(async () => { // Use useCallback to memoize the function
     try {
       const config = {
         headers: {
@@ -37,12 +37,12 @@ const MyChats = ({ fetchAgain }) => {
         position: "bottom-left",
       });
     }
-  };
+  }, [user.token, setChats, toast]); // Add dependencies
 
   useEffect(() => {
-    setLoggedUser(JSON.parse(localStorage.getItem("userInfo")));
+    setLoggedUser (JSON.parse(localStorage.getItem("userInfo")));
     fetchChats();
-  }, [fetchAgain]);
+  }, [fetchAgain, fetchChats]); // Include fetchChats in the dependency array
 
   return (
     <Box className="my-chats-container">
@@ -65,7 +65,7 @@ const MyChats = ({ fetchAgain }) => {
               >
                 <Text>
                   {!chat.isGroupChat
-                    ? getSender(loggedUser, chat.users)
+                    ? getSender(loggedUser , chat.users)
                     : chat.chatName}
                 </Text>
                 {chat.latestMessage && (
