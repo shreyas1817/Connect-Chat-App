@@ -302,7 +302,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
           id="message-input"
           isRequired
           mt={5}
-          ml={20}
           w="80%"
         >
           <Input
