@@ -15,7 +15,9 @@ import io from "socket.io-client";
 import UpdateGroupChatModal from "./miscellaneous/UpdateGroupChatModal";
 import { ChatState } from "../Context/ChatProvider";
 
-const ENDPOINT = `http://localhost:5000`;
+const ENDPOINT = `http://localhost:5000`; // Replace with your backend URL
+let socket;
+let selectedChatCompare;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [messages, setMessages] = useState([]);
@@ -24,40 +26,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [socketConnected, setSocketConnected] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [typing, setTyping] = useState(false);
-  const [selectedNodes, setSelectedNodes] = useState([]); // Node selection state
   const toast = useToast();
   const { selectedChat, user, setSelectedChat, chats } = ChatState();
-  const socketRef = useRef();
-
-  const sendMessageToNodes = async (event) => {
-    if (event.key === "Enter" && newMessage && selectedNodes.length > 0) {
-      try {
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-        };
-
-        for (let chatId of selectedNodes) {
-          await axios.post(
-            "/api/message",
-            {
-              content: newMessage,
-              chatId,
-            },
-            config
-          );
-        }
-
-        setNewMessage(""); // Clear the input
-        setSelectedNodes([]); // Deselect all nodes
-      } catch (error) {
-        console.error("Failed to send messages: ", error);
-      }
-    }
-  };
-
 
   // Fetch messages
   const fetchMessages = useCallback(async () => {
@@ -74,6 +44,9 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       const { data } = await axios.get(`/api/message/${selectedChat._id}`, config);
       setMessages(data);
       setLoading(false);
+
+      // Join the chat room
+      socket.emit("join chat", selectedChat._id);
     } catch (error) {
       toast({
         title: "Error Occurred!",
@@ -86,38 +59,41 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     }
   }, [selectedChat, user.token, toast]);
 
-  // Initialize socket
+  // Initialize socket connection
   useEffect(() => {
-    if (!user) return; // Ensure user is loaded
-  
-    socketRef.current = io(ENDPOINT);
-  
-    socketRef.current.emit("setup", user);
-    socketRef.current.on("connected", () => setSocketConnected(true));
-  
-    socketRef.current.on("message received", (newMessageReceived) => {
-      if (selectedChat && selectedChat._id === newMessageReceived.chat._id) {
-        setMessages((prevMessages) => {
-          const isDuplicate = prevMessages.some((msg) => msg._id === newMessageReceived._id);
-          return isDuplicate ? prevMessages : [...prevMessages, newMessageReceived];
-        });
-      }
-    });
-    
-  
+    if (!user) return;
+
+    socket = io(ENDPOINT);
+    socket.emit("setup", user);
+    socket.on("connected", () => setSocketConnected(true));
+    socket.on("typing", () => setIsTyping(true));
+    socket.on("stop typing", () => setIsTyping(false));
+
     return () => {
-      socketRef.current.disconnect();
+      socket.disconnect();
     };
-  }, [user, selectedChat]);
-  
+  }, [user]);
+
   useEffect(() => {
     fetchMessages();
+    selectedChatCompare = selectedChat; // For tracking the current chat
   }, [selectedChat, fetchMessages]);
+
+  // Real-time message handling
+  useEffect(() => {
+    socket.on("message received", (newMessageReceived) => {
+      if (!selectedChatCompare || selectedChatCompare._id !== newMessageReceived.chat._id) {
+        // Optionally, notify the user about new messages in other chats
+      } else {
+        setMessages((prevMessages) => [...prevMessages, newMessageReceived]);
+      }
+    });
+  });
 
   const sendMessage = async (event) => {
     if (event.key === "Enter" && newMessage) {
-      setTyping(false);
-  
+      socket.emit("stop typing", selectedChat._id); // Stop typing indicator
+
       try {
         const config = {
           headers: {
@@ -125,16 +101,16 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             Authorization: `Bearer ${user.token}`,
           },
         };
-  
+
         const { data } = await axios.post(
           "/api/message",
           { content: newMessage, chatId: selectedChat._id },
           config
         );
-  
-        socketRef.current.emit("new message", data);
+
+        socket.emit("new message", data);
         setMessages((prevMessages) => [...prevMessages, data]);
-        setNewMessage(""); // Clear message after successful send
+        setNewMessage(""); // Clear input
       } catch (error) {
         toast({
           title: "Error Occurred!",
@@ -148,50 +124,34 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     }
   };
 
+  const typingHandler = (e) => {
+    setNewMessage(e.target.value);
+
+    if (!socketConnected) return;
+
+    if (!typing) {
+      setTyping(true);
+      socket.emit("typing", selectedChat._id);
+    }
+
+    const lastTypingTime = new Date().getTime();
+    const timerLength = 3000;
+
+    setTimeout(() => {
+      const timeNow = new Date().getTime();
+      if (timeNow - lastTypingTime >= timerLength && typing) {
+        socket.emit("stop typing", selectedChat._id);
+        setTyping(false);
+      }
+    }, timerLength);
+  };
+
   useEffect(() => {
     const chatContainer = document.querySelector(".messages");
     if (chatContainer) {
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
   }, [messages]);
-  
-
-  const typingHandler = (e) => {
-    setNewMessage(e.target.value);
-    socketRef.current.on("typing", (room) => {
-      console.log(`Typing event received for room: ${room}`);
-      setIsTyping(true);
-    });
-    
-    socketRef.current.on("stop typing", (room) => {
-      console.log(`Stop typing event received for room: ${room}`);
-      setIsTyping(false);
-    });
-    
-    if (!socketConnected) return;
-
-    if (!typing) {
-      setTyping(true);
-      socketRef.current.emit("typing", selectedChat._id);
-    }
-    let lastTypingTime = new Date().getTime();
-    const timerLength = 3000;
-    setTimeout(() => {
-      const timeNow = new Date().getTime();
-      const timeDiff = timeNow - lastTypingTime;
-      if (timeDiff >= timerLength && typing) {
-        socketRef.current.emit("stop typing", selectedChat._id);
-        setTyping(false);
-      }
-    }, timerLength);
-  };
-
-  // Node Selection and Graph Rendering
-  const toggleNodeSelection = (chatId) => {
-    setSelectedNodes((prev) =>
-      prev.includes(chatId) ? prev.filter((id) => id !== chatId) : [...prev, chatId]
-    );
-  };
 
   return (
     <>
@@ -216,9 +176,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
               (!selectedChat.isGroupChat ? (
                 <>
                   {getSender(user, selectedChat.users)}
-                  <ProfileModal
-                    user={getSenderFull(user, selectedChat.users)}
-                  />
+                  <ProfileModal user={getSenderFull(user, selectedChat.users)} />
                 </>
               ) : (
                 <>
@@ -243,25 +201,14 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             overflowY="hidden"
           >
             {loading ? (
-              <Spinner
-                size="xl"
-                w={20}
-                h={20}
-                alignSelf="center"
-                margin="auto"
-              />
+              <Spinner size="xl" w={20} h={20} alignSelf="center" margin="auto" />
             ) : (
               <div className="messages">
                 <ScrollableChat messages={messages} />
               </div>
             )}
 
-            <FormControl
-              onKeyDown={sendMessage}
-              id="first-name"
-              isRequired
-              mt={3}
-            >
+            <FormControl onKeyDown={sendMessage} isRequired mt={3}>
               {isTyping ? (
                 <div>
                   <Lottie
@@ -283,59 +230,10 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         </>
       ) : (
         <Box d="flex" flexDir="column" justifyContent="center" alignItems="center" h="100%">
-        <Box className="network-graph" position="relative" height="300px" mb={4}>
-  {chats &&
-    chats.slice(0, 6).map((chat, index) => {
-      const angle = (index / 6) * 2 * Math.PI; // Divide into 6 segments for top 6 chats
-      const x = `${50 + Math.cos(angle) * 50}%`;
-      const y = `${50 + Math.sin(angle) * 50}%`;
-
-      return (
-        <Box
-          key={chat._id}
-          className={`node ${selectedNodes.includes(chat._id) ? "selected" : ""}`}
-          position="absolute"
-          top={y}
-          left={x}
-          backgroundColor={selectedNodes.includes(chat._id) ? "#FF6347" : "#4a90e2"}
-          borderRadius="50%"
-          width="100px" // Increased node size
-          height="100px" // Increased node size
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          onClick={() => toggleNodeSelection(chat._id)}
-          cursor="pointer"
-          transform="translate(-50%, -50%)"
-        >
-          <Text color="white" fontSize="md"> {/* Slightly larger font */}
-            {chat.isGroupChat ? chat.chatName : chat.users[0].name}
+          <Text fontSize="3xl" pb={3} fontFamily="Work sans">
+            Click on a chat to start messaging
           </Text>
         </Box>
-      );
-    })}
-</Box>
-        <br/>
-        <Text fontSize="xl" fontFamily="Work sans">
-          Select nodes to send a message
-        </Text>
-
-        <FormControl
-          onKeyDown={sendMessageToNodes}
-          id="message-input"
-          isRequired
-          mt={5}
-          w="80%"
-        >
-          <Input
-            bg="#E0E0E0"
-            _hover={{ cursor: "text" }}
-            placeholder="Enter a message.."
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-          />
-        </FormControl>
-      </Box>
       )}
     </>
   );
