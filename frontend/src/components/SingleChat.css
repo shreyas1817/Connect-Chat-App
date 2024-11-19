@@ -67,6 +67,11 @@
     color: white;
   }
   
+  /* In SingleChat.css */
+.messages {
+  overflow-y: auto; /* Allow scrolling */
+  max-height: 100%; /* Set a maximum height */
+}
   /* Latest message preview */
   .latest-message {
     font-size: 12px;

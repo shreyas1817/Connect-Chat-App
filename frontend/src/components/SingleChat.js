@@ -88,22 +88,28 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
   // Initialize socket
   useEffect(() => {
+    if (!user) return; // Ensure user is loaded
+  
     socketRef.current = io(ENDPOINT);
-
+  
     socketRef.current.emit("setup", user);
     socketRef.current.on("connected", () => setSocketConnected(true));
-
+  
     socketRef.current.on("message received", (newMessageReceived) => {
       if (selectedChat && selectedChat._id === newMessageReceived.chat._id) {
-        setMessages((prevMessages) => [...prevMessages, newMessageReceived]);
+        setMessages((prevMessages) => {
+          const isDuplicate = prevMessages.some((msg) => msg._id === newMessageReceived._id);
+          return isDuplicate ? prevMessages : [...prevMessages, newMessageReceived];
+        });
       }
     });
-
+    
+  
     return () => {
       socketRef.current.disconnect();
     };
   }, [user, selectedChat]);
-
+  
   useEffect(() => {
     fetchMessages();
   }, [selectedChat, fetchMessages]);
@@ -111,6 +117,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const sendMessage = async (event) => {
     if (event.key === "Enter" && newMessage) {
       setTyping(false);
+  
       try {
         const config = {
           headers: {
@@ -118,18 +125,16 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             Authorization: `Bearer ${user.token}`,
           },
         };
+  
         const { data } = await axios.post(
           "/api/message",
-          {
-            content: newMessage,
-            chatId: selectedChat._id,
-          },
+          { content: newMessage, chatId: selectedChat._id },
           config
         );
-
+  
         socketRef.current.emit("new message", data);
         setMessages((prevMessages) => [...prevMessages, data]);
-        setNewMessage("");
+        setNewMessage(""); // Clear message after successful send
       } catch (error) {
         toast({
           title: "Error Occurred!",
@@ -143,9 +148,26 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     }
   };
 
+  useEffect(() => {
+    const chatContainer = document.querySelector(".messages");
+    if (chatContainer) {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+  }, [messages]);
+  
+
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
-
+    socketRef.current.on("typing", (room) => {
+      console.log(`Typing event received for room: ${room}`);
+      setIsTyping(true);
+    });
+    
+    socketRef.current.on("stop typing", (room) => {
+      console.log(`Stop typing event received for room: ${room}`);
+      setIsTyping(false);
+    });
+    
     if (!socketConnected) return;
 
     if (!typing) {

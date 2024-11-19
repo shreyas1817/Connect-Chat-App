@@ -73,16 +73,42 @@ io.on("connection", (socket) => {
   socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
 
   socket.on("new message", (newMessageRecieved) => {
-    var chat = newMessageRecieved.chat;
-
-    if (!chat.users) return console.log("chat.users not defined");
-
+    const chat = newMessageRecieved.chat;
+  
+    if (!chat || !chat.users) {
+      return console.error("Chat or chat.users not defined");
+    }
+  
+    console.log(`New message for chat: ${chat._id}`);
+  
     chat.users.forEach((user) => {
-      if (user._id == newMessageRecieved.sender._id) return;
-
-      socket.in(user._id).emit("message recieved", newMessageRecieved);
+      if (user._id === newMessageRecieved.sender._id) return;
+  
+      console.log(`Emitting message to user: ${user._id}`);
+      socket.in(user._id).emit("message received", newMessageRecieved);
     });
   });
+  
+  io.on("connection", (socket) => {
+    console.log("Connected to socket.io");
+  
+    socket.on("setup", (userData) => {
+      console.log(`User connected: ${userData._id}`);
+      socket.join(userData._id);
+      socket.emit("connected");
+    });
+  
+    socket.on("join chat", (room) => {
+      console.log(`User joined room: ${room}`);
+      socket.join(room);
+    });
+  
+    // Ensure users leave the room properly
+    socket.on("disconnect", () => {
+      console.log("User disconnected");
+    });
+  });
+  
 
   socket.off("setup", () => {
     console.log("USER DISCONNECTED");
