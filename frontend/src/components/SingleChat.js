@@ -24,9 +24,40 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [socketConnected, setSocketConnected] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [typing, setTyping] = useState(false);
+  const [selectedNodes, setSelectedNodes] = useState([]); // Node selection state
   const toast = useToast();
-  const { selectedChat, user, setSelectedChat } = ChatState();
-  const socketRef = useRef(); // Using useRef for socket instance
+  const { selectedChat, user, setSelectedChat, chats } = ChatState();
+  const socketRef = useRef();
+
+  const sendMessageToNodes = async (event) => {
+    if (event.key === "Enter" && newMessage && selectedNodes.length > 0) {
+      try {
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+        };
+
+        for (let chatId of selectedNodes) {
+          await axios.post(
+            "/api/message",
+            {
+              content: newMessage,
+              chatId,
+            },
+            config
+          );
+        }
+
+        setNewMessage(""); // Clear the input
+        setSelectedNodes([]); // Deselect all nodes
+      } catch (error) {
+        console.error("Failed to send messages: ", error);
+      }
+    }
+  };
+
 
   // Fetch messages
   const fetchMessages = useCallback(async () => {
@@ -55,7 +86,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     }
   }, [selectedChat, user.token, toast]);
 
-  // Initialize socket and listen for events
+  // Initialize socket
   useEffect(() => {
     socketRef.current = io(ENDPOINT);
 
@@ -69,7 +100,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     });
 
     return () => {
-      socketRef.current.disconnect(); // Cleanup on unmount
+      socketRef.current.disconnect();
     };
   }, [user, selectedChat]);
 
@@ -96,7 +127,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
           config
         );
 
-        socketRef.current.emit("new message", data); // Emit new message event
+        socketRef.current.emit("new message", data);
         setMessages((prevMessages) => [...prevMessages, data]);
         setNewMessage("");
       } catch (error) {
@@ -131,6 +162,13 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         setTyping(false);
       }
     }, timerLength);
+  };
+
+  // Node Selection and Graph Rendering
+  const toggleNodeSelection = (chatId) => {
+    setSelectedNodes((prev) =>
+      prev.includes(chatId) ? prev.filter((id) => id !== chatId) : [...prev, chatId]
+    );
   };
 
   return (
@@ -222,11 +260,60 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
           </Box>
         </>
       ) : (
-        <Box d="flex" alignItems="center" justifyContent="center" h="100%">
-          <Text fontSize="3xl" pb={3} fontFamily="Work sans">
-            Click on a user to start chatting
+        <Box d="flex" flexDir="column" justifyContent="center" alignItems="center" h="100%">
+        <Box className="network-graph" position="relative" height="300px" mb={4}>
+  {chats &&
+    chats.slice(0, 6).map((chat, index) => {
+      const angle = (index / 6) * 2 * Math.PI; // Divide into 6 segments for top 6 chats
+      const x = `${50 + Math.cos(angle) * 50}%`;
+      const y = `${50 + Math.sin(angle) * 50}%`;
+
+      return (
+        <Box
+          key={chat._id}
+          className={`node ${selectedNodes.includes(chat._id) ? "selected" : ""}`}
+          position="absolute"
+          top={y}
+          left={x}
+          backgroundColor={selectedNodes.includes(chat._id) ? "#FF6347" : "#4a90e2"}
+          borderRadius="50%"
+          width="100px" // Increased node size
+          height="100px" // Increased node size
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          onClick={() => toggleNodeSelection(chat._id)}
+          cursor="pointer"
+          transform="translate(-50%, -50%)"
+        >
+          <Text color="white" fontSize="md"> {/* Slightly larger font */}
+            {chat.isGroupChat ? chat.chatName : chat.users[0].name}
           </Text>
         </Box>
+      );
+    })}
+</Box>
+        <br/>
+        <Text fontSize="xl" fontFamily="Work sans">
+          Select nodes to send a message
+        </Text>
+
+        <FormControl
+          onKeyDown={sendMessageToNodes}
+          id="message-input"
+          isRequired
+          mt={5}
+          w="80%"
+        >
+          <Input
+            bg="#E0E0E0"
+            _hover={{ cursor: "text" }}
+            placeholder="Enter a message.."
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+          />
+        </FormControl>
+      </Box>
       )}
     </>
   );

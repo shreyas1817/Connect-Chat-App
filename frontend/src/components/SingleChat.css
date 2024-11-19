@@ -91,3 +91,42 @@
     border-radius: 6px;
   }
   
+
+  .network-graph {
+    position: relative;
+    height: 500px;
+    width: 100%;
+    border-radius: 10px; /* Rounded edges for the graph container */  }
+  
+  .node {
+    position: absolute;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+    font-family: "Work Sans", sans-serif;
+    font-weight: bold;
+    background-color: #4a90e2; /* Default blue color */
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .node:hover {
+    transform: scale(1.2); /* Slightly enlarge the node on hover */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3); /* Add shadow on hover */
+  }
+  
+  .node.selected {
+    background-color: #ff6347; /* Highlight color for selected nodes */
+    box-shadow: 0 4px 10px rgba(255, 99, 71, 0.6); /* Glowing effect for selected nodes */
+  }
+  
+  .node:active {
+    transform: scale(1.1); /* Scale back slightly on click */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Reduce shadow on click */
+  }
+  
