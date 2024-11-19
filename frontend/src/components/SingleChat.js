@@ -88,28 +88,22 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
   // Initialize socket
   useEffect(() => {
-    if (!user) return; // Ensure user is loaded
-  
     socketRef.current = io(ENDPOINT);
-  
+
     socketRef.current.emit("setup", user);
     socketRef.current.on("connected", () => setSocketConnected(true));
-  
+
     socketRef.current.on("message received", (newMessageReceived) => {
       if (selectedChat && selectedChat._id === newMessageReceived.chat._id) {
-        setMessages((prevMessages) => {
-          const isDuplicate = prevMessages.some((msg) => msg._id === newMessageReceived._id);
-          return isDuplicate ? prevMessages : [...prevMessages, newMessageReceived];
-        });
+        setMessages((prevMessages) => [...prevMessages, newMessageReceived]);
       }
     });
-    
-  
+
     return () => {
       socketRef.current.disconnect();
     };
   }, [user, selectedChat]);
-  
+
   useEffect(() => {
     fetchMessages();
   }, [selectedChat, fetchMessages]);
@@ -117,7 +111,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const sendMessage = async (event) => {
     if (event.key === "Enter" && newMessage) {
       setTyping(false);
-  
       try {
         const config = {
           headers: {
@@ -125,16 +118,18 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             Authorization: `Bearer ${user.token}`,
           },
         };
-  
         const { data } = await axios.post(
           "/api/message",
-          { content: newMessage, chatId: selectedChat._id },
+          {
+            content: newMessage,
+            chatId: selectedChat._id,
+          },
           config
         );
-  
+
         socketRef.current.emit("new message", data);
         setMessages((prevMessages) => [...prevMessages, data]);
-        setNewMessage(""); // Clear message after successful send
+        setNewMessage("");
       } catch (error) {
         toast({
           title: "Error Occurred!",
@@ -148,26 +143,9 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     }
   };
 
-  useEffect(() => {
-    const chatContainer = document.querySelector(".messages");
-    if (chatContainer) {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-  }, [messages]);
-  
-
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
-    socketRef.current.on("typing", (room) => {
-      console.log(`Typing event received for room: ${room}`);
-      setIsTyping(true);
-    });
-    
-    socketRef.current.on("stop typing", (room) => {
-      console.log(`Stop typing event received for room: ${room}`);
-      setIsTyping(false);
-    });
-    
+
     if (!socketConnected) return;
 
     if (!typing) {
@@ -208,7 +186,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             alignItems="center"
           >
             <IconButton
-              d={{ base: "flex", md: "none" }}
               icon={<ArrowBackIcon />}
               onClick={() => setSelectedChat("")}
             />
@@ -222,7 +199,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                 </>
               ) : (
                 <>
-                  {selectedChat.chatName.toUpperCase()}
+                  {selectedChat.chatName}
                   <UpdateGroupChatModal
                     fetchMessages={fetchMessages}
                     fetchAgain={fetchAgain}
@@ -306,7 +283,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
           justifyContent="center"
           onClick={() => toggleNodeSelection(chat._id)}
           cursor="pointer"
-          transform="translate(-50%, -50%)"
+          transform="translate(-10%, -10%)"
         >
           <Text color="white" fontSize="md"> {/* Slightly larger font */}
             {chat.isGroupChat ? chat.chatName : chat.users[0].name}
@@ -315,8 +292,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       );
     })}
 </Box>
-        <br/>
-        <Text fontSize="xl" fontFamily="Work sans">
+<br/>
+        <Text fontSize="xl" fontFamily="Work sans" textAlign="center" ml={20} mt={59}>
           Select nodes to send a message
         </Text>
 
@@ -325,6 +302,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
           id="message-input"
           isRequired
           mt={5}
+          ml={20}
           w="80%"
         >
           <Input
