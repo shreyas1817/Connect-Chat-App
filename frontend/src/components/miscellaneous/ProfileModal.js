@@ -26,7 +26,7 @@ const ProfileModal = ({ user, children }) => {
       )}
       <Modal size="lg" onClose={onClose} isOpen={isOpen} isCentered>
         <ModalOverlay />
-        <ModalContent h="410px">
+        <ModalContent h="410px" bg="#6965F1">
           <ModalHeader
             fontSize="40px"
             fontFamily="Work sans"
@@ -35,7 +35,7 @@ const ProfileModal = ({ user, children }) => {
           >
             {user.name}
           </ModalHeader>
-          <ModalCloseButton />
+          <ModalCloseButton color="white"/>
           <ModalBody
             d="flex"
             flexDir="column"
@@ -56,7 +56,7 @@ const ProfileModal = ({ user, children }) => {
             </Text>
           </ModalBody>
           <ModalFooter>
-            <Button onClick={onClose}>Close</Button>
+            <Button onClick={onClose} _hover={{bg:"#2B4274", color:"white"}}>Close</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

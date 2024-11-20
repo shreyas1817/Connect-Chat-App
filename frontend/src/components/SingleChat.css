@@ -71,6 +71,7 @@
 .messages {
   overflow-y: auto; /* Allow scrolling */
   max-height: 100%; /* Set a maximum height */
+  color: #000;
 }
   /* Latest message preview */
   .latest-message {
@@ -115,7 +116,7 @@
     font-size: 16px;
     font-family: "Work Sans", sans-serif;
     font-weight: bold;
-    background-color: #4a90e2; /* Default blue color */
+    background-color: #C35CFE;
     cursor: pointer;
     transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
   }
@@ -126,7 +127,7 @@
   }
   
   .node.selected {
-    background-color: #ff6347; /* Highlight color for selected nodes */
+    background-color: #372569; /* Highlight color for selected nodes */
     box-shadow: 0 4px 10px rgba(255, 99, 71, 0.6); /* Glowing effect for selected nodes */
   }
   

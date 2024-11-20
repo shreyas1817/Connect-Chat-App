@@ -34,15 +34,15 @@ function Homepage() {
         borderRadius="lg"
         borderWidth="1px"
       >
-        <Text fontSize="4xl" fontFamily="Work sans">
-          Connect
+        <Text fontSize="4xl" fontFamily="Work sans"><b>
+          Connect</b>
         </Text>
       </Box>
       <Box bg="white" w="100%" p={4} borderRadius="lg" borderWidth="1px">
         <Tabs isFitted variant="soft-rounded">
           <TabList mb="1em">
-            <Tab>Login</Tab>
-            <Tab>Sign Up</Tab>
+            <Tab><b>Login</b></Tab>
+            <Tab><b>Sign Up</b></Tab>
           </TabList>
           <TabPanels>
             <TabPanel>

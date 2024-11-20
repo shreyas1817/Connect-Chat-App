@@ -55,16 +55,17 @@
   cursor: pointer;
   padding: 10px 15px;
   border-radius: 6px;
-  background-color: #e8e8e8;
+  color:#9c9c9c;
+  background-color: #344E96;
   transition: background-color 0.3s, color 0.3s;
 }
 
 .chat-item:hover {
-  background-color: #d6d6d6;
+  background-color: #2B4274;
 }
 
 .chat-item.selected {
-  background-color: #5966b7;
+  background-color: #313764;
   color: white;
 }
 
@@ -72,9 +73,9 @@
 .latest-message {
   font-size: 0.85rem;
   margin-top: 5px;
-  color: #555; /* Slightly muted text color */
+  color: #fff; /* Slightly muted text color */
 }
 
 .latest-message b {
-  color: #333;
+  color: #a7a3ff;
 }

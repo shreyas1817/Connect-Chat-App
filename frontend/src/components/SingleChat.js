@@ -145,24 +145,34 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
-
+  
     if (!socketConnected) return;
-
+  
     if (!typing) {
       setTyping(true);
       socketRef.current.emit("typing", selectedChat._id);
     }
+  
     let lastTypingTime = new Date().getTime();
     const timerLength = 3000;
+  
+    // Update isTyping state and emit 'stop typing' after a delay
     setTimeout(() => {
       const timeNow = new Date().getTime();
       const timeDiff = timeNow - lastTypingTime;
+  
       if (timeDiff >= timerLength && typing) {
         socketRef.current.emit("stop typing", selectedChat._id);
         setTyping(false);
+        setIsTyping(false); // Set isTyping to false after typing has stopped
       }
     }, timerLength);
+  
+    // Set isTyping to true when typing starts
+    setIsTyping(true);
   };
+  
+  
 
   // Node Selection and Graph Rendering
   const toggleNodeSelection = (chatId) => {
@@ -260,60 +270,60 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         </>
       ) : (
         <Box d="flex" flexDir="column" justifyContent="center" alignItems="center" h="100%">
-        <Box className="network-graph" position="relative" height="300px" mb={4}>
-  {chats &&
-    chats.slice(0, 6).map((chat, index) => {
-      const angle = (index / 6) * 2 * Math.PI; // Divide into 6 segments for top 6 chats
-      const x = `${50 + Math.cos(angle) * 50}%`;
-      const y = `${50 + Math.sin(angle) * 50}%`;
+          <Box className="network-graph" position="relative" height="300px" mb={4}>
+            {chats &&
+              chats.slice(0, 6).map((chat, index) => {
+              const angle = (index / 6) * 2 * Math.PI; // Divide into 6 segments for top 6 chats
+              const x = `${50 + Math.cos(angle) * 50}%`;
+              const y = `${50 + Math.sin(angle) * 50}%`;
 
-      return (
-        <Box
-          key={chat._id}
-          className={`node ${selectedNodes.includes(chat._id) ? "selected" : ""}`}
-          position="absolute"
-          top={y}
-          left={x}
-          backgroundColor={selectedNodes.includes(chat._id) ? "#FF6347" : "#4a90e2"}
-          borderRadius="50%"
-          width="100px" // Increased node size
-          height="100px" // Increased node size
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          onClick={() => toggleNodeSelection(chat._id)}
-          cursor="pointer"
-          transform="translate(-10%, -10%)"
-        >
-          <Text color="white" fontSize="md"> {/* Slightly larger font */}
-            {chat.isGroupChat ? chat.chatName : chat.users[0].name}
+              return (
+                <Box
+                  key={chat._id}
+                  className={`node ${selectedNodes.includes(chat._id) ? "selected" : ""}`}
+                  position="absolute"
+                  top={y}
+                  left={x}
+                  backgroundColor={selectedNodes.includes(chat._id) ? "#372569" : "#744FDD"}
+                  borderRadius="50%"
+                  width="100px" // Increased node size
+                  height="100px" // Increased node size
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  onClick={() => toggleNodeSelection(chat._id)}
+                  cursor="pointer"
+                  transform="translate(-10%, -10%)"
+                >
+                <Text color="white" fontSize="md"> {/* Slightly larger font */}
+                  {chat.isGroupChat ? chat.chatName : chat.users[0].name}
+                </Text>
+                </Box>
+              );
+            })}
+          </Box>
+          <br/>
+          <Text fontSize="xl" fontFamily="Work sans" textAlign="center" ml={20} mt={59}>
+            Select nodes to send a message
           </Text>
-        </Box>
-      );
-    })}
-</Box>
-<br/>
-        <Text fontSize="xl" fontFamily="Work sans" textAlign="center" ml={20} mt={59}>
-          Select nodes to send a message
-        </Text>
 
-        <FormControl
-          onKeyDown={sendMessageToNodes}
-          id="message-input"
-          isRequired
-          mt={5}
-          ml={20}
-          w="80%"
-        >
-          <Input
-            bg="#E0E0E0"
-            _hover={{ cursor: "text" }}
-            placeholder="Enter a message.."
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-          />
-        </FormControl>
-      </Box>
+          <FormControl
+            onKeyDown={sendMessageToNodes}
+            id="message-input"
+            isRequired
+            mt={5}
+            ml={20}
+            w="80%"
+          >
+            <Input
+              bg="#E0E0E0"
+              _hover={{ cursor: "text" }}
+              placeholder="Enter a message.."
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+            />
+          </FormControl>
+        </Box>
       )}
     </>
   );

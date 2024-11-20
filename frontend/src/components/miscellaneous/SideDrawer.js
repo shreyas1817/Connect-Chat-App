@@ -1,7 +1,9 @@
 import { Button } from "@chakra-ui/button";
 import { useDisclosure } from "@chakra-ui/hooks";
+import { Flex,Image } from '@chakra-ui/react';
 import { Input } from "@chakra-ui/input";
 import { Box, Text } from "@chakra-ui/layout";
+import Logo from "./logo192.png";
 import {
   Menu,
   MenuButton,
@@ -128,22 +130,31 @@ function SideDrawer() {
         d="flex"
         justifyContent="space-between"
         alignItems="center"
-        bg="#6965F1"
+        bg="#313764"
         w="100%"
         p="5px 10px 5px 10px"
         borderWidth="5px"
+        borderColor="#a7a3ff"
       >
         <Tooltip label="Search Users to chat" hasArrow placement="bottom-end">
-          <Button variant="ghost" onClick={onOpen} bg="white"  borderRadius="20px">
+          <Button variant="ghost" onClick={onOpen} bg="#6965F1"  borderRadius="20px">
             <i className="fas fa-search"></i>
             <Text d={{ base: "none", md: "flex" }} px={4}>
               Search User
             </Text>
           </Button>
         </Tooltip>
-        <Text fontSize="2xl" fontFamily="Work sans" color="#AAE7FF">
-          Connect
-        </Text>
+        <Flex alignItems="center">
+          <Image 
+            src={Logo} 
+            alt="Logo" 
+            boxSize="40px" // Adjust size as needed
+            marginRight="10px" // Spacing between image and text
+          />
+          <Text fontSize="2xl" fontFamily="Work sans" color="#AAE7FF">
+            Connect
+          </Text>
+        </Flex>
         <div>
           <Menu>
             <MenuButton p={1}>
@@ -151,7 +162,7 @@ function SideDrawer() {
                 count={notification.length}
                 effect={Effect.SCALE}
               />
-              <BellIcon fontSize="2xl" m={1} />
+              <BellIcon fontSize="2xl" m={1} color="#6965F1" />
             </MenuButton>
             <MenuList pl={2}>
               {!notification.length && "No New Messages"}
@@ -171,20 +182,20 @@ function SideDrawer() {
             </MenuList>
           </Menu>
           <Menu>
-            <MenuButton as={Button} bg="#4753a5" rightIcon={<ChevronDownIcon />} borderRadius="20px">
+            <MenuButton as={Button} bg="#744FDD" rightIcon={<ChevronDownIcon />} borderRadius="20px">
               <Avatar
                 size="sm"
                 cursor="pointer"
                 name={user.name}
                 src={user.pic}
               />
-            </MenuButton>
-            <MenuList>
+            </MenuButton >
+            <MenuList bg="#744FDD" color="#fff">
               <ProfileModal user={user}>
-                <MenuItem>My Profile</MenuItem>{" "}
+                <MenuItem _hover={{ bg: "#a7a3ff", color: "#fff" }}>My Profile</MenuItem>{" "}
               </ProfileModal>
               <MenuDivider />
-              <MenuItem onClick={logoutHandler}>Logout</MenuItem>
+              <MenuItem _hover={{ bg: "#a7a3ff", color: "#fff" }} onClick={logoutHandler}>Logout</MenuItem>
             </MenuList>
           </Menu>
         </div>
@@ -192,17 +203,18 @@ function SideDrawer() {
 
       <Drawer placement="left" onClose={onClose} isOpen={isOpen}>
         <DrawerOverlay />
-        <DrawerContent>
-          <DrawerHeader borderBottomWidth="1px">Search Users</DrawerHeader>
-            <DrawerBody>
+        <DrawerContent bg="#744FDD">
+          <DrawerHeader borderBottomWidth="1px" color="white">Search Users</DrawerHeader>
+            <DrawerBody >
               <Box d="flex" pb={2}>
                 <Input
                 placeholder="Search by name or email"
                 mr={2}
+                bg="white"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 />
-                <Button onClick={handleSearch}>Go</Button>
+                <Button _hover={{bg:"#2B4274", color:"#fff"}} onClick={handleSearch}>Go</Button>
               </Box>
             {loading ? (
               <ChatLoading />
