@@ -19,6 +19,17 @@ const ChatProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [history]);
 
+  // Listen for localStorage changes to sync user updates
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+      setUser(userInfo);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   return (
     <ChatContext.Provider
       value={{

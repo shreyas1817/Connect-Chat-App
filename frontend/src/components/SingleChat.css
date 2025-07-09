@@ -136,3 +136,79 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Reduce shadow on click */
   }
   
+  /* Rocket animation styles */
+  .rocket {
+    font-size: 24px;
+    position: absolute;
+    z-index: 1000;
+    pointer-events: none;
+  }
+  
+  .rocket-trail {
+    position: absolute;
+    width: 3px;
+    height: 20px;
+    background: linear-gradient(to top, 
+      rgba(255, 165, 0, 0.8) 0%,
+      rgba(255, 69, 0, 0.6) 50%,
+      rgba(255, 0, 0, 0.4) 100%);
+    border-radius: 50%;
+    animation: trail 0.3s ease-out infinite;
+  }
+  
+  @keyframes trail {
+    0% {
+      opacity: 1;
+      transform: scaleY(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scaleY(0.5);
+    }
+  }
+  
+  /* Explosion effect when rocket reaches target */
+  .explosion {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: radial-gradient(circle, 
+      rgba(255, 255, 0, 0.8) 0%,
+      rgba(255, 165, 0, 0.6) 30%,
+      rgba(255, 69, 0, 0.4) 60%,
+      transparent 100%);
+    animation: explode 0.5s ease-out forwards;
+  }
+  
+  @keyframes explode {
+    0% {
+      transform: scale(0);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+  
+  /* Enhanced node selection effect */
+  .node.selected {
+    background-color: #372569 !important;
+    box-shadow: 0 0 20px rgba(199, 92, 254, 0.8);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(199, 92, 254, 0.8);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(199, 92, 254, 1);
+    }
+  }
+  

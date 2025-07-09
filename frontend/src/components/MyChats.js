@@ -8,6 +8,7 @@ import ChatLoading from "./ChatLoading";
 import GroupChatModal from "./miscellaneous/GroupChatModal";
 import { Button } from "@chakra-ui/react";
 import { ChatState } from "../Context/ChatProvider";
+import socket from "../socket";
 import "./MyChats.css"; // Import the CSS file
 
 const MyChats = ({ fetchAgain }) => {
@@ -43,6 +44,28 @@ const MyChats = ({ fetchAgain }) => {
     setLoggedUser (JSON.parse(localStorage.getItem("userInfo")));
     fetchChats();
   }, [fetchAgain, fetchChats]); // Include fetchChats in the dependency array
+
+  // Add socket listeners for real-time chat updates
+  useEffect(() => {
+    const handleMessageReceived = (newMessage) => {
+      // Update chat list when a new message is received
+      fetchChats();
+    };
+
+    const handleNewChat = (newChat) => {
+      // Add new chat to the list
+      setChats(prevChats => [newChat, ...prevChats]);
+    };
+
+    // Listen for socket events
+    socket.on("message received", handleMessageReceived);
+    socket.on("new chat", handleNewChat);
+
+    return () => {
+      socket.off("message received", handleMessageReceived);
+      socket.off("new chat", handleNewChat);
+    };
+  }, [fetchChats, setChats]);
 
   return (
     <Box className="my-chats-container">

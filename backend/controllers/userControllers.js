@@ -51,6 +51,7 @@ const registerUser = asyncHandler(async (req, res) => {
       email: user.email,
       isAdmin: user.isAdmin,
       pic: user.pic,
+      nodePreference: user.nodePreference,
       token: generateToken(user._id),
     });
   } else {
@@ -74,6 +75,7 @@ const authUser = asyncHandler(async (req, res) => {
       email: user.email,
       isAdmin: user.isAdmin,
       pic: user.pic,
+      nodePreference: user.nodePreference,
       token: generateToken(user._id),
     });
   } else {
@@ -82,4 +84,36 @@ const authUser = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { allUsers, registerUser, authUser };
+//@description     Update user preferences
+//@route           PUT /api/user/preferences
+//@access          Private
+const updateUserPreferences = asyncHandler(async (req, res) => {
+  const { nodePreference } = req.body;
+
+  if (!nodePreference || nodePreference < 3 || nodePreference > 12) {
+    res.status(400);
+    throw new Error("Node preference must be between 3 and 12");
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    { nodePreference },
+    { new: true }
+  ).select("-password");
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  res.json({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    isAdmin: user.isAdmin,
+    pic: user.pic,
+    nodePreference: user.nodePreference,
+  });
+});
+
+module.exports = { allUsers, registerUser, authUser, updateUserPreferences };

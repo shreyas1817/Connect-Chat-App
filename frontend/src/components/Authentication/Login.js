@@ -1,7 +1,7 @@
 import { Button } from "@chakra-ui/button";
 import { FormControl, FormLabel } from "@chakra-ui/form-control";
 import { Input, InputGroup, InputRightElement } from "@chakra-ui/input";
-import { VStack } from "@chakra-ui/layout";
+import { VStack, Text } from "@chakra-ui/layout";
 import { useState } from "react";
 import axios from "axios";
 import { useToast } from "@chakra-ui/react";
@@ -15,16 +15,35 @@ const Login = () => {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
   const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   const history = useHistory();
   const { setUser } = ChatState();
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const submitHandler = async () => {
     setLoading(true);
     if (!email || !password) {
       toast({
-        title: "Please Fill all the Feilds",
+        title: "Please Fill all the Fields",
         status: "warning",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      toast({
+        title: "Invalid Email Format",
+        description: "Please enter a valid email address",
+        status: "error",
         duration: 5000,
         isClosable: true,
         position: "bottom",
@@ -78,8 +97,22 @@ const Login = () => {
           value={email}
           type="email"
           placeholder="Enter Your Email Address"
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setEmailError("");
+          }}
+          onBlur={() => {
+            if (email && !validateEmail(email)) {
+              setEmailError("Please enter a valid email address");
+            }
+          }}
+          borderColor={emailError ? "red.500" : "gray.300"}
         />
+        {emailError && (
+          <Text color="red.500" fontSize="sm" mt={1}>
+            {emailError}
+          </Text>
+        )}
       </FormControl>
       <FormControl id="password" isRequired>
         <FormLabel>Password</FormLabel>

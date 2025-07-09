@@ -3998,9 +3998,9 @@ caniuse-api@^3.0.0:
     lodash.uniq "^4.5.0"
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000981, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001125, caniuse-lite@^1.0.30001669:
-  version "1.0.30001680"
-  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001680.tgz"
-  integrity sha512-rPQy70G6AGUMnbwS1z6Xg+RkHYPAi18ihs47GH0jcxIG7wArmPgY3XbS2sRdBbxJljp3thdT8BIqv9ccCypiPA==
+  version "1.0.30001727"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001727.tgz"
+  integrity sha512-pB68nIHmbN6L/4C6MH1DokyR3bYqFwjaSs/sWDHGj4CTcFtQUQMuJftVwWkXq7mNWOybD3KhUv3oWHoGxgP14Q==
 
 capture-exit@^2.0.0:
   version "2.0.0"
@@ -4083,15 +4083,20 @@ char-regex@^1.0.2:
   version "1.0.0"
   resolved "file:.."
   dependencies:
+    "@chakra-ui/icons" "^2.2.4"
+    "@chakra-ui/react" "^3.1.2"
+    "@emotion/react" "^11.13.3"
+    "@emotion/styled" "^11.13.0"
     bcryptjs "^2.4.3"
     colors "^1.4.0"
     dotenv "^9.0.2"
     express "^4.17.1"
     express-async-handler "^1.1.4"
+    framer-motion "^11.11.17"
     jsonwebtoken "^8.5.1"
     mongoose "^5.12.9"
     nodemon "^2.0.7"
-    socket.io "^4.1.2"
+    socket.io "^4.8.1"
 
 check-types@^11.2.3:
   version "11.2.3"

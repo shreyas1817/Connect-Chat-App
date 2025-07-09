@@ -11,6 +11,7 @@ import {
   MenuItem,
   MenuList,
 } from "@chakra-ui/menu";
+import { Select } from "@chakra-ui/select";
 import {
   Drawer,
   DrawerBody,
@@ -56,6 +57,45 @@ function SideDrawer() {
   const logoutHandler = () => {
     localStorage.removeItem("userInfo");
     history.push("/");
+  };
+
+  const updateNodePreference = async (nodePreference) => {
+    try {
+      const config = {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+
+      const { data } = await axios.put(
+        "/api/user/preferences",
+        { nodePreference: parseInt(nodePreference) },
+        config
+      );
+
+      // Update user in localStorage
+      const updatedUser = { ...user, nodePreference: data.nodePreference };
+      localStorage.setItem("userInfo", JSON.stringify(updatedUser));
+      
+      toast({
+        title: "Preference Updated",
+        description: `Node preference set to ${nodePreference}`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
+      });
+    } catch (error) {
+      toast({
+        title: "Error updating preference",
+        description: error.response?.data?.message || "Something went wrong",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "top",
+      });
+    }
   };
 
   const handleSearch = async () => {
@@ -194,6 +234,23 @@ function SideDrawer() {
               <ProfileModal user={user}>
                 <MenuItem _hover={{ bg: "#a7a3ff", color: "#fff" }}>My Profile</MenuItem>{" "}
               </ProfileModal>
+              <MenuDivider />
+              <Box px={3} py={2}>
+                <Text fontSize="sm" mb={2}>Nodes to Display:</Text>
+                <Select
+                  size="sm"
+                  value={user?.nodePreference || 6}
+                  onChange={(e) => updateNodePreference(e.target.value)}
+                  bg="white"
+                  color="black"
+                  borderColor="#a7a3ff"
+                >
+                  <option value="3">3 Nodes</option>
+                  <option value="6">6 Nodes</option>
+                  <option value="9">9 Nodes</option>
+                  <option value="12">12 Nodes</option>
+                </Select>
+              </Box>
               <MenuDivider />
               <MenuItem _hover={{ bg: "#a7a3ff", color: "#fff" }} onClick={logoutHandler}>Logout</MenuItem>
             </MenuList>

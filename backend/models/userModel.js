@@ -17,6 +17,13 @@ const userSchema = mongoose.Schema(
       required: true,
       default: false,
     },
+    nodePreference: {
+      type: Number,
+      required: true,
+      default: 6,
+      min: 3,
+      max: 12,
+    },
   },
   { timestaps: true }
 );
